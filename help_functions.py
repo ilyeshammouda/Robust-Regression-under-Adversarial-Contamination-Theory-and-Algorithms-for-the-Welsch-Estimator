@@ -1,7 +1,11 @@
 import numpy as np
 from scipy.linalg import inv, det
 from scipy.stats import invweibull,burr12,t,bernoulli
-
+import statsmodels.api as sm
+from statsmodels.robust.norms import TukeyBiweight,Hampel
+from sklearn.model_selection import KFold, train_test_split
+from statsmodels.robust.robust_linear_model import RLM
+from tqdm import tqdm
 
 
 
@@ -211,4 +215,99 @@ def calculate_residuals(y_pred,true_y):
         residuals = y_pred - true_y
         return residuals
 
+
+
+def grid_search_cv_tukey(
+    X: np.ndarray,
+    y: np.ndarray,
+    c_values: np.ndarray,
+    n_splits: int = 5,
+) -> float:
+    """
+    Select the best Tukey constant c via K-Fold cross-validation (median MSE).
+ 
+    Args:
+        X: design matrix.
+        y: response vector.
+        c_values: candidate values for the Tukey constant.
+        n_splits: number of CV folds.
+ 
+    Returns:
+        best_c: the c value with the lowest median validation error.
+    """
+    kf = KFold(n_splits=n_splits)
+    best_c = None
+    best_error = float("inf")
+ 
+    for c in tqdm(c_values, desc="Tukey CV"):
+        fold_errors = []
+ 
+        for train_idx, val_idx in kf.split(X):
+            X_train, X_val = X[train_idx], X[val_idx]
+            y_train, y_val = y[train_idx], y[val_idx]
+ 
+            rlm_model = sm.RLM(y_train, X_train, M=TukeyBiweight(c=c))
+            beta_hat = rlm_model.fit().params
+ 
+            y_pred = X_val @ beta_hat
+            fold_errors.append(np.mean((y_val - y_pred) ** 2))
+ 
+        median_error = np.median(fold_errors)
+        if median_error < best_error:
+            best_error = median_error
+            best_c = c
+ 
+    return best_c
+
+
+
+def grid_search_cv_hampel(
+    X: np.ndarray,
+    y: np.ndarray,
+    a_values: list[float],
+    b_values: list[float],
+    c_values: list[float],
+    n_splits: int = 5,
+    random_state: int = None,
+) -> dict:
+    """
+    Select the best Hampel tuning constants (a, b, c) via K-Fold CV (median MSE).
+ 
+    Only evaluates combinations where a < b < c (required by Hampel).
+ 
+    Args:
+        X: design matrix.
+        y: response vector.
+        a_values, b_values, c_values: candidate grids for each constant.
+        n_splits: number of CV folds.
+        random_state: random seed for fold splits.
+ 
+    Returns:
+        best_params: dict with keys 'a', 'b', 'c'.
+    """
+    kf = KFold(n_splits=n_splits, shuffle=True, random_state=random_state)
+    best_params = None
+    best_error = float("inf")
+ 
+    for a in a_values:
+        for b in b_values:
+            for c in c_values:
+                if not (a < b < c):
+                    continue
+ 
+                fold_errors = []
+                for train_idx, val_idx in kf.split(X):
+                    X_train, X_val = X[train_idx], X[val_idx]
+                    y_train, y_val = y[train_idx], y[val_idx]
+ 
+                    model = RLM(y_train, X_train, M=Hampel(a=a, b=b, c=c))
+                    y_pred = model.fit().predict(X_val)
+                    fold_errors.append(np.mean((y_val - y_pred) ** 2))
+ 
+                median_error = np.median(fold_errors)
+                if median_error < best_error:
+                    best_error = median_error
+                    best_params = {"a": a, "b": b, "c": c}
+ 
+    return best_params
 
