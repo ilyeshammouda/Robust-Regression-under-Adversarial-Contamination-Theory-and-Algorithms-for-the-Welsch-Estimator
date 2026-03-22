@@ -4,7 +4,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold
 from tqdm import tqdm
 
-from help_functions import alpha_divergence_tools, score
+from algorithms.help_functions import alpha_divergence_tools, score
 
 
 class LeastAbsoluteDeviationAlgo:
