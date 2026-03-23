@@ -109,7 +109,7 @@ def generate_corrupted_model(n, p,beta_etoile,x_mean=0,x_std=1,noise_mean=0,nois
 
 
 
-def alpha_divergence(tau,x):
+def Welsch(tau,x):
     return (1/tau)*(1-np.exp((-tau/2)*(x**2)))
 
 
@@ -121,15 +121,15 @@ def huber(u,tau):
             return tau*(abs(u)-(1/2)*(tau))
 
 
-def alpha_div_regression(tau,X,Y,beta):
+def Welsch_regression(tau,X,Y,beta):
     n=Y.shape[0]
-    return (1/n) * np.sum(alpha_divergence(tau,Y - X @ beta))
+    return (1/n) * np.sum(Welsch(tau,Y - X @ beta))
 
 
 
 
-def alpha_div_somme_2(tau,x1,x2):
-    return (1/2)*(alpha_divergence(tau,x1)+alpha_divergence(tau,x2))
+def Welsch_somme_2(tau,x1,x2):
+    return (1/2)*(Welsch(tau,x1)+Welsch(tau,x2))
 
 
 def Huber_somme_2_vriables(tau,x1,x2):
@@ -145,7 +145,7 @@ def huber_regression(tau,X,Y,beta):
 
 
 
-class alpha_divergence_tools:
+class Welsch_tools:
     '''
     Dans cette classe j'implimente quelques outils en relation avec la divergence alpha.
     Typiquement, la loss qu'on considére, ainsi que le gradient de celle-ci par rapport à beta.
@@ -156,7 +156,7 @@ class alpha_divergence_tools:
         self.sigma= sigma
         self.n,self.p= X.shape
 
-    def alpha_divergence_weight(self,beta,tau):
+    def Welsch_weight(self,beta,tau):
         '''
         Avec cette fonction, je calcule les 'poids'. Dans la fonction, cette partie correspond à la partie 
         exponentielle de la divergence alpha.
@@ -166,13 +166,13 @@ class alpha_divergence_tools:
 
 
 
-    def alpha_divergence_loss(self,beta,tau):
+    def Welsch_loss(self,beta,tau):
         '''
         Ici je calcule la divergence alpha pour les X et Y donnés. 
         Cette fonction est en effet à seule variable, ça sera utile dans la suite de la considérer ainsi.
         '''
         ones= np.ones(self.n)
-        v_exp= self.alpha_divergence_weight(beta,tau)
+        v_exp= self.Welsch_weight(beta,tau)
         v_inter=ones-v_exp
         return(1/(self.n*tau))*v_inter.sum()
 
@@ -182,7 +182,7 @@ class alpha_divergence_tools:
         Pour les méthode scipy il est important de la considérer comme une fonction à une seule variable.
         '''
 
-        weight= self.alpha_divergence_weight(beta,tau)
+        weight= self.Welsch_weight(beta,tau)
         term1= np.dot(((self.X.T) * weight.reshape(1, -1)),self.X)
         itermediate=self.y*weight
         term2= np.dot(self.X.T,itermediate)
@@ -192,12 +192,12 @@ class alpha_divergence_tools:
             return np.dot(inv(term1), term2)
 
 
-    def gradient_alpha_divergence_loss(self,beta,tau):
+    def gradient_Welsch_loss(self,beta,tau):
         '''
         Finalement, je calcule le gradient de la divergence alpha par rapport à beta.
         J'utilise cette foncition pour la méthode de Nesterov.
         '''
-        weight= self.alpha_divergence_weight(beta,tau)
+        weight= self.Welsch_weight(beta,tau)
         term1=np.dot((1/self.n) *((self.X.T) * weight.reshape(1, -1)),self.X)
         itermediate=self.y*weight
         term2= np.dot((1/self.n)*self.X.T,itermediate)
@@ -206,8 +206,8 @@ class alpha_divergence_tools:
 
 
 def score(X,y,beta,tau):
-    alp_tool=alpha_divergence_tools(X=X,y=y)
-    f_beta=alp_tool.alpha_divergence_loss(beta=beta,tau=tau)
+    alp_tool=Welsch_tools(X=X,y=y)
+    f_beta=alp_tool.Welsch_loss(beta=beta,tau=tau)
     return f_beta*tau
 
 
@@ -239,7 +239,7 @@ def grid_search_cv_tukey(
     best_c = None
     best_error = float("inf")
  
-    for c in tqdm(c_values, desc="Tukey CV"):
+    for c in c_values:
         fold_errors = []
  
         for train_idx, val_idx in kf.split(X):

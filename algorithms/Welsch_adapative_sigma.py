@@ -4,7 +4,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold
 from tqdm import tqdm
 
-from algorithms.help_functions import alpha_divergence_tools, score
+from algorithms.help_functions import Welsch_tools, score
 
 
 class LeastAbsoluteDeviationAlgo:
@@ -84,9 +84,9 @@ class LeastAbsoluteDeviationAlgo:
         return beta
 
 
-class AlphaDivergenceAlgo:
+class WelschAlgo:
     """
-    Estimates beta using alpha-divergence loss.
+    Estimates beta using Welsch loss.
 
     Supports three approaches:
         - fixed_point_approach: iterative fixed-point method.
@@ -99,7 +99,7 @@ class AlphaDivergenceAlgo:
         self.y = y
         self.sigma = sigma
         self.n, self.p = X.shape
-        self.tools = alpha_divergence_tools(self.X, self.y, self.sigma)
+        self.tools = Welsch_tools(self.X, self.y, self.sigma)
 
     # ------------------------------------------------------------------ #
     # Fixed-point approach
@@ -167,7 +167,7 @@ class AlphaDivergenceAlgo:
         tau_rescaled = tau / sigma_hat ** 2
 
         result = minimize(
-            lambda beta: self.tools.alpha_divergence_loss(beta, tau_rescaled),
+            lambda beta: self.tools.Welsch_loss(beta, tau_rescaled),
             initial_guess,
             method=method,
             tol=1e-50,
@@ -243,7 +243,7 @@ class AlphaDivergenceAlgo:
         lr = learning_rate
 
         for i in range(iterations):
-            gradient = self.tools.gradient_alpha_divergence_loss(beta, tau)
+            gradient = self.tools.gradient_Welsch_loss(beta, tau)
             beta -= lr * gradient
             lr = learning_rate * (decay_rate ** i)
 
@@ -297,7 +297,7 @@ class AlphaDivergenceAlgo:
                 original_X, original_y = self.X, self.y
                 self.X, self.y = X_train, y_train
                 self.n, self.p = X_train.shape
-                self.tools = alpha_divergence_tools(self.X, self.y, self.sigma)
+                self.tools = Welsch_tools(self.X, self.y, self.sigma)
 
                 if approach_method == "fixed_point":
                     beta_hat = self.fixed_point_approach(tau)
@@ -316,7 +316,7 @@ class AlphaDivergenceAlgo:
                 # Restore original data
                 self.X, self.y = original_X, original_y
                 self.n, self.p = self.X.shape
-                self.tools = alpha_divergence_tools(self.X, self.y, self.sigma)
+                self.tools = Welsch_tools(self.X, self.y, self.sigma)
 
                 y_pred = X_val @ beta_hat
                 fold_errors.append(mean_squared_error(y_val, y_pred))
