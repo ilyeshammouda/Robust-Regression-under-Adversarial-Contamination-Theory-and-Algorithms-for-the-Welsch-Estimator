@@ -34,7 +34,7 @@ class LeastAbsoluteDeviationAlgo:
     def optimizer_approach(
         self,
         initial_guess: np.ndarray = None,
-        method: str = "L-BFGS-B",
+        method: str = "BFGS",
         max_iter: int = 10,
     ) -> tuple[np.ndarray, int]:
         """
@@ -136,7 +136,7 @@ class WelschAlgo:
         self,
         tau: float,
         initial_guess: np.ndarray = None,
-        method: str = "L-BFGS-B",
+        method: str = "BFGS",
         maxiter: int = 10,
         maxiter_first_stage: int = 100,
     ) -> np.ndarray:
@@ -157,7 +157,7 @@ class WelschAlgo:
         # Warm start with L1 regression
         lad = LeastAbsoluteDeviationAlgo(X=self.X, y=self.y)
         initial_guess, _ = lad.optimizer_approach(
-            method="L-BFGS-B",
+            method="BFGS",
             initial_guess=initial_guess,
             max_iter=maxiter_first_stage,
         )
@@ -225,7 +225,7 @@ class WelschAlgo:
             while score(X=self.X, y=self.y, tau=tau, beta=initial_guess) > score_threshold:
                 warm_start_iters += 1
                 initial_guess, _ = lad.optimizer_approach(
-                    method="L-BFGS-B", initial_guess=initial_guess, max_iter=1
+                    method="BFGS", initial_guess=initial_guess, max_iter=1
                 )
                 if beta_star is not None:
                     distance_list.append(

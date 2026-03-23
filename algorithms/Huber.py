@@ -56,7 +56,7 @@ class HuberAlgo:
         self,
         gamma: float,
         initial_guess: np.ndarray = None,
-        method: str = "L-BFGS-B",
+        method: str = "BFGS",
         max_iter: int = 10,
     ) -> tuple[np.ndarray, int]:
         """

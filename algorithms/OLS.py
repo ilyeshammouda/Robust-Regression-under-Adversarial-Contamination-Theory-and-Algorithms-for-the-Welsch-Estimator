@@ -37,7 +37,7 @@ class OLS:
     def optimizer_approach(
         self,
         initial_guess: np.ndarray = None,
-        method: str = "L-BFGS-B",
+        method: str = "BFGS",
         max_iter: int = 1000,
     ) -> np.ndarray:
         """
