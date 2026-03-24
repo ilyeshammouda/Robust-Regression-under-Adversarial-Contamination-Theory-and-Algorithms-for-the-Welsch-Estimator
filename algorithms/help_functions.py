@@ -32,21 +32,24 @@ def generate_linear_model(n, p,beta_etoile,x_mean=0,x_std=1,noise_mean=0,noise_s
     elif noise_type == 'student':
         epsilon = t.rvs(df=df, size=n)  # df est le nombre de degrés de liberté pour la t de Student
         epsilon=epsilon/np.sqrt(np.var(epsilon))
+        epsilon=noise_std*epsilon
 
 
     elif noise_type=='pareto':
         pareto=np.random.pareto(a=k,size=n)
         epsilon=pareto - np.mean(pareto)
         epsilon=epsilon/np.sqrt(np.var(epsilon)) # Je centre et normalise le bruit 
-
+        epsilon=noise_std*epsilon
+        
     elif noise_type=='log-normlal':
 
-        epsilon=np.random.lognormal(mean=0, sigma=1, size=n)
-    
+        epsilon=np.random.lognormal(mean=0, sigma=noise_std, size=n)
+        
     elif noise_type=='burr':
 
         epsilon = np.random.gamma(100, 30, size=n)
         epsilon = (epsilon - np.mean(epsilon)) / np.std(epsilon)
+        epsilon=noise_std*epsilon
 
     else:
         raise ValueError("Type de bruit non supporté : choisir 'Gaussian' ou 'Student' ou 'Pareto' ")
