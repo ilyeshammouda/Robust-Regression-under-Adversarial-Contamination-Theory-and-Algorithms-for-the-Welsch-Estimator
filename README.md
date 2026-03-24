@@ -150,7 +150,7 @@ The notebook is organized into four main sections:
 
 ### 1. Breakdown point experiments
 
-Compares the bias of the Welsch estimator against Huber, Tukey's biweight, Hampel's three-part, and quantile regression (q = 0.1, 0.5, 0.9) as the contamination fraction ε varies from 0 to 0.10. Uses Pareto-distributed noise with n = 10,000 samples, p = 10 features, and 5,000 repetitions per contamination level.
+Compares the bias of the Welsch estimator against Huber, Tukey's biweight, Hampel's three-part, and quantile regression (q = 0.1, 0.5, 0.9) as the contamination fraction $\epsilon$ varies from 0 to 0.10. Uses Pareto-distributed noise with n = 10,000 samples, p = 10 features, and 5,000 repetitions per contamination level.
 
 > **Note:** These experiments are computationally expensive. Pre-computed results are provided in `Results/break_down_points/`.
 
@@ -180,7 +180,7 @@ The two-stage optimization procedure works as follows:
 
 **Stage 1 — L1 warm start.** Solve the Least Absolute Deviation (LAD) regression problem to obtain an initial estimate $\beta_{0}$ that lies within the basin of attraction of the Welsch objective. This stage is robust to outliers and provides a good starting point.
 
-**Stage 2 — Welsch refinement.** Starting from $\beta_{0}$, minimize the Welsch loss using BFGS (or gradient descent). For the adaptive variant, the temperature parameter is rescaled as $\frac{\tau}{\hat{\sigma}}$, where σ̂ is the median absolute residual from Stage 1.
+**Stage 2 — Welsch refinement.** Starting from $\beta_{0}$, minimize the Welsch loss. For the adaptive variant, the temperature parameter is rescaled as $\frac{\tau}{\hat{\sigma}}$, where σ̂ is the median absolute residual from Stage 1.
 
 Three optimization backends are available:
 - `optimizer_approach`: Two-stage L1 warm start + scipy BFGS (recommended).
