@@ -26,6 +26,15 @@ A central technical contribution of this paper is a practical algorithm that pro
 - We establish improved unbiasedness in the presence of large outliers.
 - Extensive experiments on synthetic and real-world data demonstrate the superiority of the Welsch estimator over Huber, Tukey's biweight, Hampel's three-part, and quantile regression.
 
+<p align="center">
+  <img src="assets/images/loss_functions_comparison.png" width="500"/>
+</p>
+<p align="center"><em>Figure 1: Comparison between Huber and Welsch loss functions.</em></p>
+
+<p align="center">
+  <img src="assets/images/breakdown_comparison.png" width="850"/>
+</p>
+<p align="center"><em>Figure 2: Comparison of the Euclidean norm of the bias of the Welsch estimator against other robust estimators.</em></p>
 
 
 ## Why the Welsch estimator?
@@ -39,7 +48,7 @@ A central technical contribution of this paper is a practical algorithm that pro
 
 The Welsch loss is defined as:
 
-$$\rho_\tau(u) = \frac{1}{\tau}\left(1 - \exp\left(-\frac{\tau}{2}u^2\right)\right)$$
+$$\ell_\tau(u) = \frac{1}{\tau}\left(1 - \exp\left(-\frac{\tau}{2}u^2\right)\right)$$
 
 where $\tau$ > 0 is the temperature parameter controlling the trade-off between robustness and efficiency.
 
@@ -56,6 +65,8 @@ where $\tau$ > 0 is the temperature parameter controlling the trade-off between 
 │   ├── OLS.py                           # Ordinary Least Squares baseline
 │   ├── help_functions.py                # Data generation, Welsch tools, CV utilities
 │   └── leave_one_out.py                 # K-Fold CV evaluation for all estimators
+├── assets/
+│   └── images/                          # Figures from the paper
 ├── Experiments/
 │   └── exps.ipynb                       # All experiments (breakdown, MSE, real-world, sensitivity)
 ├── Data/
