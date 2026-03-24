@@ -1,4 +1,4 @@
-# Robust Regression under Adversarial Contamination (Welsch Estimator)
+# Robust Regression under Adversarial Contamination: Theory and Algorithms for the Welsch Estimator
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2412.19183)
 [![Code](https://img.shields.io/badge/Code-GitHub-181717?logo=github&logoColor=white)](https://github.com/ilyeshammouda/Robust-Regression-under-Adversarial-Contamination-Theory-and-Algorithms-for-the-Welsch-Estimator)
@@ -7,21 +7,23 @@
 
 Implementation of the paper **"Robust Regression under Adversarial Contamination: Theory and Algorithms for the Welsch Estimator"**.
 
-[Ilyes Hammouda](https://github.com/ilyeshammouda), [Mohamed Ndaoud](mailto:mohamed.ndaoud@ensae.fr), [Abd-Krim Seghouane](mailto:abd-krim.seghouane@unimelb.edu.au)
+[Ilyes Hammouda](https://github.com/ilyeshammouda), [Mohamed Ndaoud](https://sites.google.com/view/mndaoud), [Abd-Krim Seghouane](https://findanexpert.unimelb.edu.au/profile/470194-karim-seghouane)
 
 
 
 ## Overview
 
-Convex and penalized robust regression methods (Huber, LAD, quantile regression) suffer from a **persistent bias** induced by large outliers, limiting their effectiveness in adversarial or heavy-tailed settings.
+Convex and penalized robust regression methods often suffer from a persistent bias induced by large outliers, limiting their effectiveness in adversarial or heavy-tailed settings. In this work, we study a smooth redescending non-convex M-estimator, specifically the Welsch estimator, and show that it can eliminate this bias whenever it is statistically identifiable. We focus on high-dimensional linear regression under adversarial contamination, where a fraction of samples may be corrupted by an adversary with full knowledge of the data and underlying model.
 
-This work studies the **Welsch estimator**, a smooth redescending non-convex M-estimator, and shows that it can **eliminate this bias** whenever it is statistically identifiable. We focus on high-dimensional linear regression under **adversarial contamination**, where a fraction ε of samples may be corrupted by an adversary with full knowledge of the data and the underlying model.
+
+A central technical contribution of this paper is a practical algorithm that provably finds a statistically valid solution to this non-convex problem. We show that the Welsch objective remains locally convex within a well-characterized basin of attraction, and our algorithm is guaranteed to converge into this region and recover the desired estimator.
 
 ### Key contributions
 
 - We prove the Welsch objective remains **locally convex** within a well-characterized basin of attraction.
 - We propose a practical **two-stage algorithm** (L1 warm start → Welsch refinement) that provably converges into this region and recovers the desired estimator.
-- We introduce a **scaled (adaptive) variant** of the temperature parameter τ that removes the dependency on the unknown noise level σ.
+- We introduce a **scaled (adaptive) variant** of the temperature parameter $\tau$ that removes the dependency on the unknown noise level $\sigma$.
+- We establish improved unbiasedness in the presence of large outliers.
 - Extensive experiments on synthetic and real-world data demonstrate the superiority of the Welsch estimator over Huber, Tukey's biweight, Hampel's three-part, and quantile regression.
 
 
@@ -37,9 +39,9 @@ This work studies the **Welsch estimator**, a smooth redescending non-convex M-e
 
 The Welsch loss is defined as:
 
-$$\rho_\tau(u) = \frac{1}{\tau}\left(1 - \exp\!\left(-\frac{\tau}{2}\,u^2\right)\right)$$
+$$\rho_\tau(u) = \frac{1}{\tau}\left(1 - \exp\left(-\frac{\tau}{2}u^2\right)\right)$$
 
-where τ > 0 is the temperature parameter controlling the trade-off between robustness and efficiency.
+where $\tau$ > 0 is the temperature parameter controlling the trade-off between robustness and efficiency.
 
 
 
@@ -108,7 +110,7 @@ beta_hat = model.optimizer_approach(tau=1.0, maxiter=100)
 print("Estimation error:", np.linalg.norm(beta_hat - beta_true))
 ```
 
-### Selecting τ via cross-validation
+### Selecting $\tau$ via cross-validation
 
 ```python
 import numpy as np
@@ -120,27 +122,7 @@ best_tau = model.grid_search_cv(tau_candidates, approach_method='optimizer', n_s
 beta_hat = model.optimizer_approach(tau=best_tau, maxiter=100)
 ```
 
-### Comparing with baselines
 
-```python
-from algorithms.Huber import HuberAlgo
-from algorithms.help_functions import generate_linear_model
-
-# Generate contaminated data
-y, X, _ = generate_linear_model(
-    n=10000, p=10, beta_etoile=beta_true,
-    outliers=True, outliers_perc=0.1, outlier_const=1e6,
-    noise_type='gaussian'
-)
-
-# Huber estimator
-huber = HuberAlgo(X, y)
-beta_huber, _ = huber.optimizer_approach(gamma=1.0, max_iter=100)
-
-# Welsch estimator (adaptive)
-welsch = WelschAlgo(X, y)
-beta_welsch = welsch.optimizer_approach(tau=1.0, maxiter=100)
-```
 
 
 
@@ -175,7 +157,7 @@ Evaluates all estimators on two regression datasets using K-Fold cross-validatio
 
 ### 4. Sensitivity to the noise level
 
-Studies how the normalized MSE (E‖β̂ − β*‖² / σ²) evolves as the noise variance σ² increases from 1 to 100. Compares the fixed-τ Welsch estimator against the adaptive (scaled) variant, demonstrating that the scaled version maintains stable performance regardless of the noise level.
+Studies how the normalized MSE $\frac{\mathbf{E}\left\| \hat{\beta} - \beta^*\right\|^2}{\sigma^2}$ evolves as the noise variance $\sigma^2$ increases from 1 to 100. Compares the fixed-τ Welsch estimator against the adaptive (scaled) variant, demonstrating that the scaled version maintains stable performance regardless of the noise level.
 
 > Pre-computed results are available in `Results/Sensitivity_to_the_noise_level/`.
 
@@ -185,9 +167,9 @@ Studies how the normalized MSE (E‖β̂ − β*‖² / σ²) evolves as the noi
 
 The two-stage optimization procedure works as follows:
 
-**Stage 1 — L1 warm start.** Solve the Least Absolute Deviation (LAD) regression problem to obtain an initial estimate β₀ that lies within the basin of attraction of the Welsch objective. This stage is robust to outliers and provides a good starting point.
+**Stage 1 — L1 warm start.** Solve the Least Absolute Deviation (LAD) regression problem to obtain an initial estimate $\beta_{0}$ that lies within the basin of attraction of the Welsch objective. This stage is robust to outliers and provides a good starting point.
 
-**Stage 2 — Welsch refinement.** Starting from β₀, minimize the Welsch loss using BFGS (or gradient descent). For the adaptive variant, the temperature parameter is rescaled as τ / σ̂², where σ̂ is the median absolute residual from Stage 1.
+**Stage 2 — Welsch refinement.** Starting from $\beta_{0}$, minimize the Welsch loss using BFGS (or gradient descent). For the adaptive variant, the temperature parameter is rescaled as $\frac{\tau}{\hat{\sigma}}$, where σ̂ is the median absolute residual from Stage 1.
 
 Three optimization backends are available:
 - `optimizer_approach`: Two-stage L1 warm start + scipy BFGS (recommended).
