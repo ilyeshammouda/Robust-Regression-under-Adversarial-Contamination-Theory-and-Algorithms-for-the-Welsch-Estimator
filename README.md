@@ -59,8 +59,8 @@ where $\tau$ > 0 is the temperature parameter controlling the trade-off between 
 ```
 .
 ├── algorithms/                          # Core estimator implementations
-│   ├── Welsch_adapative_sigma.py        # Welsch estimator with adaptive (scaled) τ
-│   ├── Welch_non_adaptative.py          # Welsch estimator with fixed τ
+│   ├── Welsch_adapative_sigma.py        # Welsch estimator with adaptive (scaled) $\tau$
+│   ├── Welch_non_adaptative.py          # Welsch estimator with fixed $\tau$
 │   ├── Huber.py                         # Huber M-estimator baseline
 │   ├── OLS.py                           # Ordinary Least Squares baseline
 │   ├── help_functions.py                # Data generation, Welsch tools, CV utilities
@@ -114,7 +114,7 @@ X = np.random.randn(1000, 10)
 beta_true = np.random.randn(10)
 y = X @ beta_true + np.random.randn(1000)
 
-# Fit the Welsch estimator (adaptive τ)
+# Fit the Welsch estimator (adaptive $\tau$)
 model = WelschAlgo(X, y)
 beta_hat = model.optimizer_approach(tau=1.0, maxiter=100)
 
@@ -168,7 +168,7 @@ Evaluates all estimators on two regression datasets using K-Fold cross-validatio
 
 ### 4. Sensitivity to the noise level
 
-Studies how the normalized MSE $\frac{\mathbf{E}\left\| \hat{\beta} - \beta^*\right\|^2}{\sigma^2}$ evolves as the noise variance $\sigma^2$ increases from 1 to 100. Compares the fixed-τ Welsch estimator against the adaptive (scaled) variant, demonstrating that the scaled version maintains stable performance regardless of the noise level.
+Studies how the normalized MSE $\frac{\mathbf{E}\left\| \hat{\beta} - \beta^*\right\|^2}{\sigma^2}$ evolves as the noise variance $\sigma^2$ increases from 1 to 100. Compares the fixed-$\tau$ Welsch estimator against the adaptive (scaled) variant, demonstrating that the scaled version maintains stable performance regardless of the noise level.
 
 > Pre-computed results are available in `Results/Sensitivity_to_the_noise_level/`.
 
@@ -180,7 +180,7 @@ The two-stage optimization procedure works as follows:
 
 **Stage 1 — L1 warm start.** Solve the Least Absolute Deviation (LAD) regression problem to obtain an initial estimate $\beta_{0}$ that lies within the basin of attraction of the Welsch objective. This stage is robust to outliers and provides a good starting point.
 
-**Stage 2 — Welsch refinement.** Starting from $\beta_{0}$, minimize the Welsch loss. For the adaptive variant, the temperature parameter is rescaled as $\frac{\tau}{\hat{\sigma}}$, where σ̂ is the median absolute residual from Stage 1.
+**Stage 2 — Welsch refinement.** Starting from $\beta_{0}$, minimize the Welsch loss. For the adaptive variant, the temperature parameter is rescaled as $\frac{\tau}{\hat{\sigma}}$, where $\hat{\sigma}$ is the median absolute residual from Stage 1.
 
 Three optimization backends are available:
 - `optimizer_approach`: Two-stage L1 warm start + scipy BFGS (recommended).
