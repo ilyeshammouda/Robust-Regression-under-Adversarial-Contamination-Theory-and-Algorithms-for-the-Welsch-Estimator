@@ -7,7 +7,7 @@
 
 Implementation of the paper **"Robust Regression under Adversarial Contamination: Theory and Algorithms for the Welsch Estimator"**.
 
-[Ilyes Hammouda](https://github.com/ilyeshammouda), [Mohamed Ndaoud](https://sites.google.com/view/mndaoud), [Abd-Krim Seghouane](https://findanexpert.unimelb.edu.au/profile/470194-karim-seghouane)
+
 
 
 
